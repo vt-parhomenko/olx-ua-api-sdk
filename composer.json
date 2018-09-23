@@ -1,0 +1,25 @@
+{
+    "name": "vt-parhomenko/olx-ua-api-sdk",
+    "description": "UA OLX REST API sdk for php",
+    "version": "1.0.0",
+    "keywords": [
+        "olx",
+        "olx ua",
+        "api"
+    ],
+    "authors": [
+        {
+            "name": "Vitaliy Parhomenko",
+            "email": "vt.parhomenko@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "guzzlehttp/guzzle": "~6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Parhomenko\\Olx\\": "src"
+        }
+    }
+}
