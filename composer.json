@@ -1,7 +1,7 @@
 {
     "name": "vt-parhomenko/olx-ua-api-sdk",
     "description": "UA OLX REST API sdk for php",
-    "version": "1.1.0",
+    "license": "MIT",
     "keywords": [
         "olx",
         "olx ua",
@@ -21,5 +21,7 @@
         "psr-4": {
             "Parhomenko\\Olx\\": "src"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
