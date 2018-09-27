@@ -13,11 +13,11 @@ class Api implements IOlxApi
     private $categories = null;
     private $adverts = null;
 
-    public function __construct( array $credentials )
+    public function __construct( array $credentials, bool $update_token = false )
     {
         $this->guzzleClient = new Client(['base_uri' => self::BASE_URI]);
         $this->user = new User( $this->guzzleClient, $credentials );
-        $this->user->checkToken();
+        if($update_token) $this->user->checkToken();
     }
 
     /**
