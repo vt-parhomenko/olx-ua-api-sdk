@@ -160,14 +160,19 @@ class Adverts
     {
         try{
 
-            $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
+            $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
                 'headers' => [
                     'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
                     'Version' => self::API_VERSION
                 ]
             ] );
 
-            return true;
+            if( $response->getStatusCode() === 204 )
+            {
+                return true;
+            }
+
+            throw new \Exception( $response->getBody()->getContents() );
 
         }
         catch ( \Exception $e ){
