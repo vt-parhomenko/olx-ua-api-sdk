@@ -160,6 +160,16 @@ class Adverts
     {
         try{
 
+            $params = ['command' => 'deactivate', 'is_success' => true];
+
+            $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
+                'headers' => [
+                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
+                    'Version' => self::API_VERSION
+                ],
+                'json' => $params
+            ] );
+
             $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
                 'headers' => [
                     'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
