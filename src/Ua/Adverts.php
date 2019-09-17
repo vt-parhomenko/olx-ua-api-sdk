@@ -149,6 +149,109 @@ class Adverts
             throw $e;
         }
     }
+    
+    /**
+     * Activate offer from removed_by_user state
+     * @param int $id
+     * @return bool
+     * @throws \Exception
+     */
+    public function activate( int $id ) : bool
+    {
+        try{
+
+            $params = ['command' => 'activate'];
+
+            $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
+                'headers' => [
+                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
+                    'Version' => self::API_VERSION
+                ],
+                'json' => $params
+            ] );
+
+            
+
+            if( $response->getStatusCode() === 204 )
+            {
+                return true;
+            }
+
+            throw new \Exception( $response->getBody()->getContents() );
+
+        }
+        catch ( \Exception $e ){
+            throw $e;
+        }
+    }
+
+    
+    /**
+     * Deactivate offer from OLX.ua
+     * @param int $id
+     * @return bool
+     * @throws \Exception
+     */
+    public function deactivate( int $id ) : bool
+    {
+        try{
+
+            $params = ['command' => 'deactivate', 'is_success' => true];
+
+            $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
+                'headers' => [
+                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
+                    'Version' => self::API_VERSION
+                ],
+                'json' => $params
+            ] );
+
+            
+
+            if( $response->getStatusCode() === 204 )
+            {
+                return true;
+            }
+
+            throw new \Exception( $response->getBody()->getContents() );
+
+        }
+        catch ( \Exception $e ){
+            throw $e;
+        }
+    }
+    
+    /**
+     * Delete offer from OLX.ua
+     * @param int $id
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete_notactive( int $id ) : bool
+    {
+        try{
+
+            
+
+            $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
+                'headers' => [
+                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
+                    'Version' => self::API_VERSION
+                ]
+            ] );
+
+            if( $response->getStatusCode() === 204 )
+            {
+                return true;
+            }
+
+            throw new \Exception( $response->getBody()->getContents() );
+
+        }
+        catch ( \Exception $e ){
+            throw $e;
+        }
+    }
 
     /**
      * Delete offer from OLX.ua
