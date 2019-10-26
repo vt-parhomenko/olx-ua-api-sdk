@@ -136,7 +136,7 @@ class User
      * @param string $state
      * @return string
      */
-    public function getOAuthLink( string $redirect_uri = '', string $state = '' ) : string
+    public function getOAuthLink( string $redirect_uri = null, string $state = null ) : string
     {
         $params = [
             'client_id' =>$this->client_id,
@@ -144,8 +144,8 @@ class User
             'scope' => self::OLX_AUTH_DEFAULT_SCOPE,
         ];
 
-        if( !empty($redirect_uri) ) $params['redirect_uri'] = $redirect_uri;
-        if( !empty($state) ) $params['state'] = $state;
+        if( !is_null($redirect_uri) ) $params['redirect_uri'] = $redirect_uri;
+        if( !is_null($state) ) $params['state'] = $state;
 
         return $this->guzzleClient->getConfig( 'base_uri') .'oauth/authorize/?' .build_query( $params );
     }
@@ -153,20 +153,25 @@ class User
     /**
      * Step2. Get access token via code
      * @param string $code
+     * @param null $redirect_uri
      * @return User
      * @throws \Exception
      */
-    public function authorize( string $code ) : self
+    public function authorize( string $code, $redirect_uri = null ) : self
     {
         try{
 
-            $response = $this->guzzleClient->request('POST', self::OLX_AUTH_REQUEST_URI, [ 'json' => [
+            $request_data = [
                 'client_id' => $this->client_id,
                 'client_secret' => $this->client_secret,
                 'grant_type' => self::OLX_AUTH_DEFAULT_GRAND_TYPE,
                 'scope' => $this->scope,
                 'code' => $code
-            ] ]);
+            ];
+
+            if( !is_null($redirect_uri) ) $request_data['redirect_uri'] = $redirect_uri;
+
+            $response = $this->guzzleClient->request('POST', self::OLX_AUTH_REQUEST_URI, [ 'json' => $request_data ] );
 
             $data = json_decode( $response->getBody()->getContents(), true );
 
