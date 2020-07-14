@@ -1,5 +1,6 @@
 <?php
-namespace Parhomenko\Olx\Ua;
+
+namespace Parhomenko\Olx\Api;
 
 use GuzzleHttp\Client;
 

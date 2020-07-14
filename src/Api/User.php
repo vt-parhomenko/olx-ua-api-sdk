@@ -1,6 +1,6 @@
 <?php
-namespace Parhomenko\Olx\Ua;
 
+namespace Parhomenko\Olx\Api;
 
 use GuzzleHttp\Client;
 use function GuzzleHttp\Psr7\build_query;

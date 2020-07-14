@@ -6,4 +6,6 @@ interface IOlxApi
     public function user();
     public function categories();
     public function adverts();
+    public function regions();
+    public function cities();
 }
