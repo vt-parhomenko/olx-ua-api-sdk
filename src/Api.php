@@ -8,6 +8,7 @@ use Parhomenko\Olx\Api\Categories;
 use Parhomenko\Olx\Api\Adverts;
 use Parhomenko\Olx\Api\Regions;
 use Parhomenko\Olx\Api\Cities;
+use Parhomenko\Olx\Api\Currencies;
 
 class Api implements IOlxApi
 {
@@ -18,6 +19,7 @@ class Api implements IOlxApi
     private $adverts = null;
     private $cities = null;
     private $regions = null;
+    private $currencies = null;
 
     public function __construct( string $base_uri, array $credentials, bool $update_token = false )
     {
@@ -62,6 +64,14 @@ class Api implements IOlxApi
     public function cities()
     {
         return is_null($this->cities ) ? new Cities( $this->user, $this->guzzleClient ) : $this->cities;
+    }
+
+    /**
+     * @return Currencies
+     */
+    public function currencies()
+    {
+        return is_null($this->currencies ) ? new Currencies( $this->user, $this->guzzleClient ) : $this->currencies;
     }
 
 }
