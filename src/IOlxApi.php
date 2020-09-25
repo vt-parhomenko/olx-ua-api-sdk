@@ -8,4 +8,5 @@ interface IOlxApi
     public function adverts();
     public function regions();
     public function cities();
+    public function currencies();
 }
