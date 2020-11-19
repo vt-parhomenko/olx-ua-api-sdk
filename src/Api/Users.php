@@ -41,12 +41,10 @@ class Users
 
             if( !isset( $me_info['data'] ) ) throw new \Exception( 'Got empty response | Get authenticated user' );
 
-            //return $me_info['data'];
             $me_info = $me_info['data'];
 
         }
         catch ( \Exception $e ){
-            //print_r($e);
             throw $e;
         }
         
