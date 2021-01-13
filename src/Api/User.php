@@ -157,18 +157,18 @@ class User
      * @return User
      * @throws \Exception
      */
-    public function authorize( string $code, $redirect_uri = null ) : self
+    public function authorize( string $code = null, $redirect_uri = null ) : self
     {
         try{
 
             $request_data = [
                 'client_id' => $this->client_id,
                 'client_secret' => $this->client_secret,
-                'grant_type' => self::OLX_AUTH_DEFAULT_GRAND_TYPE,
-                'scope' => $this->scope,
-                'code' => $code
+                'grant_type' => $this->grant_type,
+                'scope' => $this->scope
             ];
 
+            if( !is_null($code) ) $request_data['code'] = $code;
             if( !is_null($redirect_uri) ) $request_data['redirect_uri'] = $redirect_uri;
 
             $response = $this->guzzleClient->request('POST', self::OLX_AUTH_REQUEST_URI, [ 'json' => $request_data ] );
@@ -178,7 +178,7 @@ class User
             if( !empty($data['access_token']) ){
                 $this->access_token = $data['access_token'];
                 $this->token_type = $data['token_type'];
-                $this->refresh_token = $data['refresh_token'];
+                if( !empty($data['refresh_token']) ) $this->refresh_token = $data['refresh_token'];
                 $this->token_expires_in = $data['expires_in'];
                 $this->token_updated_at = date( "Y-m-d H:i:s");
             }else{
