@@ -4,10 +4,10 @@ namespace Parhomenko\Olx\Api;
 
 use GuzzleHttp\Client;
 
-class Cities
+class Districts
 {
     const API_VERSION = '2.0';
-    const OLX_CITIES_URL = '/api/partner/cities';
+    const OLX_DISTRICTS_URL = '/api/partner/districts';
 
     private $user;
     private $guzzleClient;
@@ -19,45 +19,13 @@ class Cities
     }
 
     /**
-     * @param int $offset
-     * @param int|null $limit
      * @return array
      * @throws \Exception
      */
-    public function getAll(int $offset = 0, int $limit = null) : array
+    public function getAll() : array
     {
         try {
-            $response = $this->guzzleClient->request('GET', self::OLX_CITIES_URL, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'query' => [
-                    'offset' => $offset,
-                    'limit' => $limit
-                ]
-            ]);
-
-            $cities = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $cities['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX cities' );
-
-            return $cities['data'];
-
-        }catch( \Exception $e ){
-            throw $e;
-        }
-    }
-
-    /**
-     * @param int $city_id
-     * @return array
-     * @throws \Exception
-     */
-    public function get(int $city_id) : array
-    {
-        try {
-            $response = $this->guzzleClient->request('GET', self::OLX_CITIES_URL .'/' .$city_id, [
+            $response = $this->guzzleClient->request('GET', self::OLX_DISTRICTS_URL, [
                 'headers' => [
                     'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
                     'Version' => self::API_VERSION
@@ -66,11 +34,37 @@ class Cities
 
             $data = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $data['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX cities' );
+            if( !isset( $data['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX districts' );
 
             return $data['data'];
 
-        }catch( \Exception $e ){
+        } catch ( \Exception $e ){
+            throw $e;
+        }
+    }
+
+    /**
+     * @param int $district_id
+     * @return array
+     * @throws \Exception
+     */
+    public function get(int $district_id) : array
+    {
+        try {
+            $response = $this->guzzleClient->request('GET', self::OLX_DISTRICTS_URL .'/' .$district_id, [
+                'headers' => [
+                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
+                    'Version' => self::API_VERSION
+                ]
+            ]);
+
+            $data = json_decode( $response->getBody()->getContents(), true );
+
+            if( !isset( $data['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX district' );
+
+            return $data['data'];
+
+        } catch ( \Exception $e ){
             throw $e;
         }
     }

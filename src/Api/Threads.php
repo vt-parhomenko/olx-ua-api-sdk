@@ -38,7 +38,7 @@ class Threads
 
             $thread = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $thread['data'] ) ) throw new \Exception( 'Got empty response | Get OLX.ua thread' );
+            if( !isset( $thread['data'] ) ) throw new \Exception( 'Got empty response | Get OLX thread' );
 
             return $thread['data'];
 
@@ -80,7 +80,7 @@ class Threads
 
             $threads = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $threads['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX.ua threads' );
+            if( !isset( $threads['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX threads' );
 
             return $threads['data'];
 

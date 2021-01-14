@@ -47,7 +47,7 @@ class Messages
 
             $messages = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $messages['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX.ua thread messages' );
+            if( !isset( $messages['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX thread messages' );
 
             return $messages['data'];
 

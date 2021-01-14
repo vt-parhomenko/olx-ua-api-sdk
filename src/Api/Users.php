@@ -71,7 +71,7 @@ class Users
 
             $user_info = json_decode( $response->getBody()->getContents(), true );
             
-            if( !isset( $user_info['data'] ) ) throw new \Exception( 'Got empty response | Get OLX.ua advert' );
+            if( !isset( $user_info['data'] ) ) throw new \Exception( 'Got empty response | Get OLX advert' );
 
             return $user_info['data'];
 

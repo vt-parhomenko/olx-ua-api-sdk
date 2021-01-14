@@ -3,6 +3,8 @@
 namespace Parhomenko\Olx;
 
 use GuzzleHttp\Client;
+use Parhomenko\Olx\Api\Districts;
+use Parhomenko\Olx\Api\Languages;
 use Parhomenko\Olx\Api\User;
 use Parhomenko\Olx\Api\Categories;
 use Parhomenko\Olx\Api\Adverts;
@@ -19,9 +21,11 @@ class Api implements IOlxApi
     private $categories = null;
     private $adverts = null;
     private $cities = null;
+    private $districts = null;
     private $regions = null;
     private $currencies = null;
     private $users = null;
+    private $languages = null;
 
     public function __construct( string $base_uri, array $credentials, bool $update_token = false )
     {
@@ -69,6 +73,14 @@ class Api implements IOlxApi
     }
 
     /**
+     * @return Districts
+     */
+    public function districts()
+    {
+        return is_null($this->districts ) ? new Districts( $this->user, $this->guzzleClient ) : $this->districts;
+    }
+
+    /**
      * @return Currencies
      */
     public function currencies()
@@ -81,6 +93,13 @@ class Api implements IOlxApi
      */
     public function users(){
         return is_null($this->users) ? new Users( $this->user, $this->guzzleClient ) : $this->users;
+    }
+
+    /**
+     * @return Languages
+     */
+    public function languages(){
+        return is_null($this->languages) ? new Languages( $this->user, $this->guzzleClient ) : $this->languages;
     }
 
 }

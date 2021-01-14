@@ -36,7 +36,7 @@ class Categories
 
             $categories = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get OLX.ua category: ' .$category_id );
+            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get OLX category: ' .$category_id );
 
             return $categories['data'];
 
@@ -62,7 +62,7 @@ class Categories
 
             $categories = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX.ua categories, parent_id: ' .$parent_id );
+            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX categories, parent_id: ' .$parent_id );
 
             return $categories['data'];
 
@@ -89,7 +89,7 @@ class Categories
 
             $attributes = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $attributes['data'] ) ) throw new \Exception( 'Got empty response | Get OLX.ua category attributes: ' .$category_id );
+            if( !isset( $attributes['data'] ) ) throw new \Exception( 'Got empty response | Get OLX category attributes: ' .$category_id );
 
             return $attributes['data'];
 

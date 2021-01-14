@@ -37,7 +37,7 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Get OLX.ua advert' );
+            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Get OLX advert' );
 
             return $advert['data'];
 
@@ -79,7 +79,7 @@ class Adverts
 
             $adverts = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $adverts['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX.ua adverts' );
+            if( !isset( $adverts['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX adverts' );
 
             return $adverts['data'];
 
@@ -110,7 +110,7 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Create OLX.ua advert: ' .$params['title'] );
+            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Create OLX advert: ' .$params['title'] );
 
             return $advert['data'];
 
@@ -141,7 +141,7 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Update OLX.ua advert: ' .$params['title'] );
+            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Update OLX advert: ' .$params['title'] );
 
             return $advert['data'];
 
