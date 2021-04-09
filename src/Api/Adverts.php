@@ -3,6 +3,9 @@
 namespace Parhomenko\Olx\Api;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\ExceptionFactory;
 
 class Adverts
 {
@@ -19,10 +22,18 @@ class Adverts
     }
 
     /**
-     * Get one advert from OLX.UA by ID
+     *  Get one advert from OLX by ID
      * @param int $id
      * @return array
-     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\BadRequestException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function get( int $id ) : array
     {
@@ -37,25 +48,33 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Get OLX advert' );
+            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
 
             return $advert['data'];
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
 
     }
 
     /**
-     * Get all adverts from OLX.ua
+     * Get all adverts from OLX
      * @param int $offset
      * @param int|null $limit
      * @param int|null $external_id
      * @param string $category_ids
      * @return array
-     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\BadRequestException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function getAll( int $offset = 0, int $limit = null, int $external_id = null, string $category_ids = '' ) : array
     {
@@ -79,22 +98,30 @@ class Adverts
 
             $adverts = json_decode( $response->getBody()->getContents(), true );
 
-            if( !isset( $adverts['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX adverts' );
+            if( !isset( $adverts['data'] ) ) throw new BadRequestException( 'Got empty response' );
 
             return $adverts['data'];
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
 
     }
 
     /**
-     * Create offer in OLX.ua
+     * Create offer in OLX
      * @param array $params
-     * @return mixed
-     * @throws \Exception
+     * @return array
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function create( array $params ) : array
     {
@@ -110,23 +137,31 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Create OLX advert: ' .$params['title'] );
+            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response | Create OLX advert: ' .$params['title'] );
 
             return $advert['data'];
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
 
     }
 
     /**
-     * Update offer in OLX.ua
+     * Update offer in OLX
      * @param int $id
      * @param array $params
-     * @return mixed
-     * @throws \Exception
+     * @return array
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function update( int $id, array $params ) : array
     {
@@ -141,21 +176,29 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new \Exception( 'Got empty response | Update OLX advert: ' .$params['title'] );
+            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
 
             return $advert['data'];
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
     }
-    
+
     /**
-     * Activate offer from removed_by_user state
+     * Activate offer
      * @param int $id
      * @return bool
-     * @throws \Exception
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function activate( int $id ) : bool
     {
@@ -171,27 +214,32 @@ class Adverts
                 'json' => $params
             ] );
 
-            
-
             if( $response->getStatusCode() === 204 )
             {
                 return true;
             }
 
-            throw new \Exception( $response->getBody()->getContents() );
+            throw new BadRequestException( $response->getBody()->getContents() );
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
     }
 
-    
     /**
-     * Deactivate offer from OLX.ua
+     * Deactivate offer
      * @param int $id
      * @return bool
-     * @throws \Exception
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function deactivate( int $id ) : bool
     {
@@ -207,32 +255,36 @@ class Adverts
                 'json' => $params
             ] );
 
-            
-
             if( $response->getStatusCode() === 204 )
             {
                 return true;
             }
 
-            throw new \Exception( $response->getBody()->getContents() );
+            throw new BadRequestException( $response->getBody()->getContents() );
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
     }
-    
+
     /**
-     * Delete offer from OLX.ua
+     * Delete inactive offer
      * @param int $id
      * @return bool
-     * @throws \Exception
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function delete_notactive( int $id ) : bool
     {
         try{
-
-            
 
             $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
                 'headers' => [
@@ -246,19 +298,27 @@ class Adverts
                 return true;
             }
 
-            throw new \Exception( $response->getBody()->getContents() );
+            throw new BadRequestException( $response->getBody()->getContents() );
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
     }
 
     /**
-     * Delete offer from OLX.ua
+     * Delete offer
      * @param int $id
      * @return bool
-     * @throws \Exception
+     * @throws BadRequestException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function delete( int $id ) : bool
     {
@@ -286,11 +346,11 @@ class Adverts
                 return true;
             }
 
-            throw new \Exception( $response->getBody()->getContents() );
+            throw new BadRequestException( $response->getBody()->getContents() );
 
-        }
-        catch ( \Exception $e ){
-            throw $e;
+        }catch ( ClientException $e )
+        {
+            ExceptionFactory::throw( $e );
         }
     }
 

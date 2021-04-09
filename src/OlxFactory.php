@@ -2,26 +2,33 @@
 
 namespace Parhomenko\Olx;
 
+use Parhomenko\Olx\Exceptions\UnknownCountryException;
+
 class OlxFactory {
 
-    public static function get( $country_code, array $credentials, bool $update_token = false ) {
+    /**
+     * @param $country_code
+     * @param array $credentials
+     * @param bool $update_token
+     * @return Api
+     * @throws UnknownCountryException
+     */
+    public static function get( $country_code, array $credentials, bool $update_token = false ): Api
+    {
         $links = [
             'ua' => 'https://www.olx.ua/',
             'pl' => 'https://www.olx.pl/',
             'bg' => 'https://www.olx.bg/',
             'ro' => 'https://www.olx.ro/',
             'kz' => 'https://www.olx.kz/',
-            'by' => 'https://www.olx.by/',
             'pt' => 'https://www.olx.pt/',
-            'ao' => 'https://www.olx.co.ao/',
-            'mz' => 'https://www.olx.co.mz/',
         ];
 
-        if (key_exists($country_code, $links)) {
+        if (array_key_exists($country_code, $links)) {
             return new Api($links[$country_code], $credentials, $update_token);
         }
 
-        throw new \Exception( "Country does not supported" );
+        throw new UnknownCountryException( "Country does not supported" );
     }
 
 }

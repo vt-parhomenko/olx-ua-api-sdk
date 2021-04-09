@@ -3,6 +3,11 @@
 namespace Parhomenko\Olx\Api;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ExceptionFactory;
+use Parhomenko\Olx\Exceptions\RefreshTokenException;
 use function GuzzleHttp\Psr7\build_query;
 
 class User
@@ -193,9 +198,17 @@ class User
     }
 
     /**
-     * Refresh access token via refresh_token
-     * @return User
-     * @throws \Exception
+     * @return $this
+     * @throws CallLimitException
+     * @throws RefreshTokenException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Parhomenko\Olx\Exceptions\BadRequestException
+     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
+     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
+     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
+     * @throws \Parhomenko\Olx\Exceptions\ServerException
+     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
+     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
      */
     public function refreshToken() : self
     {
@@ -218,14 +231,22 @@ class User
                 $this->token_expires_in = $data['expires_in'];
                 $this->token_updated_at = date( "Y-m-d H:i:s");
             }else{
-                throw new \Exception( 'Can not refresh access token' );
+                throw new BadRequestException( 'Can not refresh access token' );
             }
 
-        } catch ( \Exception $e ) {
-            throw $e;
+            return $this;
+
+        }catch ( ClientException $e ){
+
+            if ( $e->getCode() === 400 )
+            {
+                $response = json_decode( $e->getResponse()->getBody() );
+                throw new RefreshTokenException($response->error_human_title ?? 'Can not refresh access token', $e->getCode(), null, $response->error ?? null, $response->error_description ?? null );
+            }
+
+            ExceptionFactory::throw( $e );
         }
 
-        return $this;
     }
 
 }

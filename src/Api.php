@@ -27,6 +27,12 @@ class Api implements IOlxApi
     private $users = null;
     private $languages = null;
 
+    /**
+     * Api constructor.
+     * @param string $base_uri
+     * @param array $credentials
+     * @param bool $update_token
+     */
     public function __construct( string $base_uri, array $credentials, bool $update_token = false )
     {
         $this->guzzleClient = new Client(['base_uri' => $base_uri]);
@@ -37,21 +43,21 @@ class Api implements IOlxApi
     /**
      * @return User
      */
-    public function user(){
+    public function user() : User{
         return $this->user;
     }
 
     /**
      * @return Categories
      */
-    public function categories(){
+    public function categories() : Categories{
         return is_null($this->categories) ? new Categories( $this->user, $this->guzzleClient ) : $this->categories;
     }
 
     /**
      * @return Adverts
      */
-    public function adverts()
+    public function adverts() : Adverts
     {
         return is_null($this->adverts ) ? new Adverts( $this->user, $this->guzzleClient ) : $this->adverts;
     }
@@ -59,7 +65,7 @@ class Api implements IOlxApi
     /**
      * @return Regions
      */
-    public function regions()
+    public function regions() : Regions
     {
         return is_null($this->regions ) ? new Regions( $this->user, $this->guzzleClient ) : $this->regions;
     }
@@ -67,7 +73,7 @@ class Api implements IOlxApi
     /**
      * @return Cities
      */
-    public function cities()
+    public function cities() : Cities
     {
         return is_null($this->cities ) ? new Cities( $this->user, $this->guzzleClient ) : $this->cities;
     }
@@ -75,7 +81,7 @@ class Api implements IOlxApi
     /**
      * @return Districts
      */
-    public function districts()
+    public function districts() : Districts
     {
         return is_null($this->districts ) ? new Districts( $this->user, $this->guzzleClient ) : $this->districts;
     }
@@ -83,7 +89,7 @@ class Api implements IOlxApi
     /**
      * @return Currencies
      */
-    public function currencies()
+    public function currencies() : Currencies
     {
         return is_null($this->currencies ) ? new Currencies( $this->user, $this->guzzleClient ) : $this->currencies;
     }
@@ -91,14 +97,14 @@ class Api implements IOlxApi
     /**
      * @return Users
      */
-    public function users(){
+    public function users() : Users{
         return is_null($this->users) ? new Users( $this->user, $this->guzzleClient ) : $this->users;
     }
 
     /**
      * @return Languages
      */
-    public function languages(){
+    public function languages() : Languages{
         return is_null($this->languages) ? new Languages( $this->user, $this->guzzleClient ) : $this->languages;
     }
 
