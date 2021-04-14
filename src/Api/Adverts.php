@@ -137,7 +137,7 @@ class Adverts
             ] );
 
             $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response | Create OLX advert: ' .$params['title'] );
+            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
 
             return $advert['data'];
 
@@ -228,8 +228,8 @@ class Adverts
     }
 
     /**
-     * Deactivate offer
      * @param int $id
+     * @param bool $is_success
      * @return bool
      * @throws BadRequestException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -240,12 +240,13 @@ class Adverts
      * @throws \Parhomenko\Olx\Exceptions\ServerException
      * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
      * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws \Parhomenko\Olx\Exceptions\ValidationException
      */
-    public function deactivate( int $id ) : bool
+    public function deactivate( int $id, bool $is_success = true ) : bool
     {
         try{
 
-            $params = ['command' => 'deactivate', 'is_success' => true];
+            $params = ['command' => 'deactivate', 'is_success' => $is_success ];
 
             $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
                 'headers' => [
@@ -324,15 +325,7 @@ class Adverts
     {
         try{
 
-            $params = ['command' => 'deactivate', 'is_success' => true];
-
-            $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
+            $this->deactivate( $id );
 
             $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
                 'headers' => [

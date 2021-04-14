@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class ForbiddenException extends \Exception
+class ForbiddenException extends BaseOlxException
 {
 }

@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class NotAcceptableException extends \Exception
+class NotAcceptableException extends BaseOlxException
 {
 }

@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class CallLimitException extends \Exception
+class CallLimitException extends BaseOlxException
 {
 }

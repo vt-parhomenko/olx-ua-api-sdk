@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class NotFoundException extends \Exception
+class NotFoundException extends BaseOlxException
 {
 }

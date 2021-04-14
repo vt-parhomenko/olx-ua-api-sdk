@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class UnsupportedMediaTypeException extends \Exception
+class UnsupportedMediaTypeException extends BaseOlxException
 {
 }

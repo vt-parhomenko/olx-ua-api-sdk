@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class UnknownCountryException extends \Exception
+class UnknownCountryException extends BaseOlxException
 {
 }

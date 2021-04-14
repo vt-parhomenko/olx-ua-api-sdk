@@ -3,7 +3,7 @@ namespace Parhomenko\Olx\Exceptions;
 
 use Throwable;
 
-class RefreshTokenException extends \Exception
+class RefreshTokenException extends BaseOlxException
 {
     private $error;
     private $error_description;

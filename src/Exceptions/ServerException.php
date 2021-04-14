@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class ServerException extends \Exception
+class ServerException extends BaseOlxException
 {
 }

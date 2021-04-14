@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class UnauthorizedException extends \Exception
+class UnauthorizedException extends BaseOlxException
 {
 }

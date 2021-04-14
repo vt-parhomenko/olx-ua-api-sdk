@@ -2,6 +2,6 @@
 namespace Parhomenko\Olx\Exceptions;
 
 
-class BadRequestException extends \Exception
+class BadRequestException extends BaseOlxException
 {
 }
