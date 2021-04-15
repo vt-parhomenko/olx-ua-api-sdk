@@ -36,7 +36,7 @@ class ExceptionFactory
             case 403:
                 throw new ForbiddenException( $e->getMessage(), $e->getCode() );
             case 404:
-                throw new NotFoundException( $response->error->detail ?? $e->getMessage(), $e->getCode(), $response->error->detail ?? null, $response->error->title ?? null  );
+                throw new NotFoundException( $response->error->detail ?? $e->getMessage(), $e->getCode(),  null,$response->error->detail ?? null, $response->error->title ?? null  );
             case 406:
                 throw new NotAcceptableException( $e->getMessage(), $e->getCode() );
             case 415:
