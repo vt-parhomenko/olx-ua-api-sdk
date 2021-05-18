@@ -52,12 +52,12 @@ class Adverts
      * Get all adverts from OLX.ua
      * @param int $offset
      * @param int|null $limit
-     * @param int|null $external_id
+     * @param string|null $external_id
      * @param string $category_ids
      * @return array
      * @throws \Exception
      */
-    public function getAll( int $offset = 0, int $limit = null, int $external_id = null, string $category_ids = '' ) : array
+    public function getAll( int $offset = 0, int $limit = null, string $external_id = null, string $category_ids = '' ) : array
     {
 
         try{
