@@ -59,9 +59,7 @@ class Adverts
      */
     public function getAll( int $offset = 0, int $limit = null, string $external_id = null, string $category_ids = '' ) : array
     {
-
         try{
-
             $params = [];
 
             $params['offset'] = $offset;
