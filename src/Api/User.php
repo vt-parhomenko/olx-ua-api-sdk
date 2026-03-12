@@ -8,7 +8,6 @@ use Parhomenko\Olx\Exceptions\BadRequestException;
 use Parhomenko\Olx\Exceptions\CallLimitException;
 use Parhomenko\Olx\Exceptions\ExceptionFactory;
 use Parhomenko\Olx\Exceptions\RefreshTokenException;
-use function GuzzleHttp\Psr7\build_query;
 
 class User
 {
@@ -152,7 +151,7 @@ class User
         if( !is_null($redirect_uri) ) $params['redirect_uri'] = $redirect_uri;
         if( !is_null($state) ) $params['state'] = $state;
 
-        return $this->guzzleClient->getConfig( 'base_uri') .'oauth/authorize/?' .build_query( $params );
+        return $this->guzzleClient->getConfig( 'base_uri') .'oauth/authorize/?' .\GuzzleHttp\Psr7\Query::build( $params );
     }
 
     /**
