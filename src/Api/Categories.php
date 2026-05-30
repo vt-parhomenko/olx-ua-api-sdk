@@ -1,101 +1,108 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\BaseOlxException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ForbiddenException;
+use Parhomenko\Olx\Exceptions\NotAcceptableException;
+use Parhomenko\Olx\Exceptions\NotFoundException;
+use Parhomenko\Olx\Exceptions\ServerException;
+use Parhomenko\Olx\Exceptions\UnauthorizedException;
+use Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException;
+use Parhomenko\Olx\Exceptions\ValidationException;
 
-class Categories
+class Categories extends AbstractResource
 {
-    const API_VERSION = '2.0';
-    const OLX_CATEGORIES_URL = '/api/partner/categories';
-
-    private $user;
-    private $guzzleClient;
-
-    public function __construct( User $user, Client $guzzleClient )
-    {
-        $this->user = $user;
-        $this->guzzleClient = $guzzleClient;
-    }
+    public const OLX_CATEGORIES_URL = '/api/partner/categories';
 
     /**
-     * Get all olx categories or one specified
-     * @param int $category_id
-     * @return array|mixed
-     * @throws \Exception
-     */
-    public function get( int $category_id ) : array
-    {
-
-        try{
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_CATEGORIES_URL . '/' .$category_id , [ 'headers' => [
-                'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                'Version' => self::API_VERSION
-            ]] );
-
-            $categories = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get OLX category: ' .$category_id );
-
-            return $categories['data'];
-
-        }catch ( \Exception $e ){
-            throw $e;
-        }
-
-    }
-
-    public function getAll( int $parent_id = 0 ) : array
-    {
-
-        try{
-
-            $query = $parent_id ? ['parent_id' => $parent_id] : [];
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_CATEGORIES_URL, [ 'headers' => [
-                'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                'Version' => self::API_VERSION
-            ],
-                'query' => $query
-            ] );
-
-            $categories = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $categories['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX categories, parent_id: ' .$parent_id );
-
-            return $categories['data'];
-
-        }catch ( \Exception $e ){
-            throw $e;
-        }
-
-    }
-
-    /**
-     * Get olx category attributes
+     * Get one OLX category by ID
      * @param int $category_id
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function attributes( int $category_id ) : array
+    public function get(int $category_id): array
     {
-        try{
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_CATEGORIES_URL .'/' . $category_id .'/attributes' , [ 'headers' => [
-                'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                'Version' => self::API_VERSION
-            ]] );
-
-            $attributes = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $attributes['data'] ) ) throw new \Exception( 'Got empty response | Get OLX category attributes: ' .$category_id );
-
-            return $attributes['data'];
-
-        }catch ( \Exception $e ){
-            throw $e;
-        }
+        return $this->fetchData('GET', self::OLX_CATEGORIES_URL . '/' . $category_id, [], 'Get OLX category: ' . $category_id);
     }
 
+    /**
+     * Get all OLX categories, optionally limited to a parent category
+     * @param int $parent_id
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function getAll(int $parent_id = 0): array
+    {
+        $query = $parent_id ? [ 'parent_id' => $parent_id ] : [];
+
+        return $this->fetchData('GET', self::OLX_CATEGORIES_URL, [ 'query' => $query ], 'Get all OLX categories, parent_id: ' . $parent_id);
+    }
+
+    /**
+     * Get the attributes of an OLX category
+     * @param int $category_id
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function attributes(int $category_id): array
+    {
+        return $this->fetchData('GET', self::OLX_CATEGORIES_URL . '/' . $category_id . '/attributes', [], 'Get OLX category attributes: ' . $category_id);
+    }
+
+    /**
+     * Suggest the most relevant categories for an advert title.
+     * @param string $q the advert title (min. 3 characters)
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function suggestion(string $q): array
+    {
+        return $this->fetchData('GET', self::OLX_CATEGORIES_URL . '/suggestion', [ 'query' => [ 'q' => $q ] ], 'Get category suggestion: ' . $q);
+    }
 }

@@ -1,11 +1,17 @@
 {
     "name": "vt-parhomenko/olx-ua-api-sdk",
-    "description": "UA OLX REST API sdk for php",
+    "description": "OLX REST API sdk for php",
     "license": "MIT",
     "keywords": [
         "olx",
-        "olx ua",
-        "api"
+        "api",
+        "sdk",
+        "olx.ua",
+        "olx.pl",
+        "olx.ro",
+        "olx.pt",
+        "olx.bg",
+        "olx.kz"
     ],
     "authors": [
         {
@@ -14,14 +20,33 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "guzzlehttp/guzzle": "^6|^7"
+        "php": ">=8.1.0",
+        "guzzlehttp/guzzle": "^7.5"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^9.6"
     },
     "autoload": {
         "psr-4": {
             "Parhomenko\\Olx\\": "src"
         }
     },
-    "minimum-stability": "dev",
+    "autoload-dev": {
+        "psr-4": {
+            "Parhomenko\\Olx\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpstan": "phpstan analyse",
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

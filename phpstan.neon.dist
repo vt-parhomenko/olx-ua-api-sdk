@@ -1,0 +1,9 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # This SDK returns raw decoded JSON as `array` (mixed values); generic
+        # array<string, mixed> annotations would add noise without real safety.
+        - identifier: missingType.iterableValue

@@ -1,62 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Parhomenko\Olx\Exceptions\BadRequestException;
-use Parhomenko\Olx\Exceptions\ExceptionFactory;
+use Parhomenko\Olx\Exceptions\BaseOlxException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ForbiddenException;
+use Parhomenko\Olx\Exceptions\NotAcceptableException;
+use Parhomenko\Olx\Exceptions\NotFoundException;
+use Parhomenko\Olx\Exceptions\ServerException;
+use Parhomenko\Olx\Exceptions\UnauthorizedException;
+use Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException;
+use Parhomenko\Olx\Exceptions\ValidationException;
 
-class Adverts
+class Adverts extends AbstractResource
 {
-    const API_VERSION = '2.0';
-    const OLX_ADVERTS_URL = '/api/partner/adverts';
-
-    private $user;
-    private $guzzleClient;
-
-    public function __construct( User $user, Client $guzzleClient )
-    {
-        $this->user = $user;
-        $this->guzzleClient = $guzzleClient;
-    }
+    public const OLX_ADVERTS_URL = '/api/partner/adverts';
 
     /**
-     *  Get one advert from OLX by ID
+     * Get one advert from OLX by ID
      * @param int $id
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\BadRequestException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function get( int $id ) : array
+    public function get(int $id): array
     {
-
-        try{
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_ADVERTS_URL .'/' .$id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ] );
-
-            $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
-
-            return $advert['data'];
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
-
+        return $this->fetchData('GET', self::OLX_ADVERTS_URL . '/' . $id);
     }
 
     /**
@@ -66,283 +48,277 @@ class Adverts
      * @param string|null $external_id
      * @param string $category_ids
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\BadRequestException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function getAll( int $offset = 0, int $limit = null, string $external_id = null, string $category_ids = '' ) : array
+    public function getAll(int $offset = 0, ?int $limit = null, ?string $external_id = null, string $category_ids = ''): array
     {
-        try{
-            $params = [];
+        $params = [
+            'offset' => $offset,
+            'limit' => $limit,
+        ];
 
-            $params['offset'] = $offset;
-            $params['limit'] = $limit;
-            if( $external_id ) $params['external_id'] = $external_id;
-            if( !empty($category_ids) ) $params['category_ids'] = $category_ids;
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_ADVERTS_URL, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'query' => $params
-            ] );
-
-            $adverts = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $adverts['data'] ) ) throw new BadRequestException( 'Got empty response' );
-
-            return $adverts['data'];
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
+        if ($external_id !== null && $external_id !== '') {
+            $params['external_id'] = $external_id;
+        }
+        if ($category_ids !== '') {
+            $params['category_ids'] = $category_ids;
         }
 
+        return $this->fetchData('GET', self::OLX_ADVERTS_URL, [ 'query' => $params ]);
     }
 
     /**
-     * Create offer in OLX
+     * Create an offer in OLX
      * @param array $params
      * @return array
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function create( array $params ) : array
+    public function create(array $params): array
     {
-
-        try{
-
-            $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
-
-            return $advert['data'];
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
-
+        return $this->fetchData('POST', self::OLX_ADVERTS_URL, [ 'json' => $params ]);
     }
 
     /**
-     * Update offer in OLX
+     * Update an offer in OLX
      * @param int $id
      * @param array $params
      * @return array
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function update( int $id, array $params ) : array
+    public function update(int $id, array $params): array
     {
-        try{
-
-            $response = $this->guzzleClient->request( 'PUT', self::OLX_ADVERTS_URL .'/' .$id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            $advert = json_decode( $response->getBody()->getContents(), true );
-            if( !isset( $advert['data'] ) ) throw new BadRequestException( 'Got empty response' );
-
-            return $advert['data'];
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
+        return $this->fetchData('PUT', self::OLX_ADVERTS_URL . '/' . $id, [ 'json' => $params ]);
     }
 
     /**
-     * Activate offer
+     * Activate an offer
      * @param int $id
-     * @return bool
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function activate( int $id ) : bool
+    public function activate(int $id): void
     {
-        try{
+        $response = $this->request('POST', self::OLX_ADVERTS_URL . '/' . $id . '/commands', [
+            'json' => [ 'command' => 'activate' ],
+        ]);
 
-            $params = ['command' => 'activate'];
-
-            $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new BadRequestException( $response->getBody()->getContents() );
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
+        $this->expectStatus($response);
     }
 
     /**
+     * Deactivate an offer
      * @param int $id
      * @param bool $is_success
-     * @return bool
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
-     * @throws \Parhomenko\Olx\Exceptions\ValidationException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function deactivate( int $id, bool $is_success = true ) : bool
+    public function deactivate(int $id, bool $is_success = true): void
     {
-        try{
+        $response = $this->request('POST', self::OLX_ADVERTS_URL . '/' . $id . '/commands', [
+            'json' => [ 'command' => 'deactivate', 'is_success' => $is_success ],
+        ]);
 
-            $params = ['command' => 'deactivate', 'is_success' => $is_success ];
-
-            $response = $this->guzzleClient->request( 'POST', self::OLX_ADVERTS_URL .'/' .$id .'/commands', [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new BadRequestException( $response->getBody()->getContents() );
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
+        $this->expectStatus($response);
     }
 
     /**
-     * Delete inactive offer
+     * Delete an offer
      * @param int $id
-     * @return bool
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function delete_notactive( int $id ) : bool
+    public function delete(int $id): void
     {
-        try{
+        $response = $this->request('DELETE', self::OLX_ADVERTS_URL . '/' . $id);
 
-            $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new BadRequestException( $response->getBody()->getContents() );
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
+        $this->expectStatus($response);
     }
 
     /**
-     * Delete offer
+     * Get the statistics of an advert
      * @param int $id
-     * @return bool
-     * @throws BadRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Parhomenko\Olx\Exceptions\CallLimitException
-     * @throws \Parhomenko\Olx\Exceptions\ForbiddenException
-     * @throws \Parhomenko\Olx\Exceptions\NotAcceptableException
-     * @throws \Parhomenko\Olx\Exceptions\NotFoundException
-     * @throws \Parhomenko\Olx\Exceptions\ServerException
-     * @throws \Parhomenko\Olx\Exceptions\UnauthorizedException
-     * @throws \Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function delete( int $id ) : bool
+    public function statistics(int $id): array
     {
-        try{
-
-            $this->deactivate( $id );
-
-            $response = $this->guzzleClient->request( 'DELETE', self::OLX_ADVERTS_URL .'/' .$id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new BadRequestException( $response->getBody()->getContents() );
-
-        }catch ( ClientException $e )
-        {
-            ExceptionFactory::throw( $e );
-        }
+        return $this->fetchData('GET', self::OLX_ADVERTS_URL . '/' . $id . '/statistics', [], 'Get advert statistics: ' . $id);
     }
 
+    /**
+     * Delete a single statistic counter of an advert
+     * @param int $id
+     * @param string $statistic_name
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function deleteStatistic(int $id, string $statistic_name): void
+    {
+        $response = $this->request('DELETE', self::OLX_ADVERTS_URL . '/' . $id . '/statistics/' . $statistic_name);
+
+        $this->expectStatus($response);
+    }
+
+    /**
+     * Get the moderation reason for a rejected advert
+     * @param int $id
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function moderationReason(int $id): array
+    {
+        return $this->fetchData('GET', self::OLX_ADVERTS_URL . '/' . $id . '/moderation-reason', [], 'Get advert moderation reason: ' . $id);
+    }
+
+    /**
+     * Get the logos attached to an advert
+     * @param int $id
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function logos(int $id): array
+    {
+        return $this->fetchData('GET', self::OLX_ADVERTS_URL . '/' . $id . '/logos', [], 'Get advert logos: ' . $id);
+    }
+
+    /**
+     * Attach a logo to an advert
+     * @param int $id
+     * @param array $params see the OLX API docs
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function addLogo(int $id, array $params): array
+    {
+        return $this->fetchData('POST', self::OLX_ADVERTS_URL . '/' . $id . '/logos', [ 'json' => $params ], 'Add advert logo: ' . $id);
+    }
+
+    /**
+     * Detach a logo from an advert
+     * @param int $id
+     * @param int $logo_id
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function deleteLogo(int $id, int $logo_id): void
+    {
+        $response = $this->request('DELETE', self::OLX_ADVERTS_URL . '/' . $id . '/logos/' . $logo_id);
+
+        $this->expectStatus($response);
+    }
 }

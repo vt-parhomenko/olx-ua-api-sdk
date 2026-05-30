@@ -1,65 +1,71 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\BaseOlxException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ForbiddenException;
+use Parhomenko\Olx\Exceptions\NotAcceptableException;
+use Parhomenko\Olx\Exceptions\NotFoundException;
+use Parhomenko\Olx\Exceptions\ServerException;
+use Parhomenko\Olx\Exceptions\UnauthorizedException;
+use Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException;
+use Parhomenko\Olx\Exceptions\ValidationException;
 
-class Messages
+class Messages extends AbstractResource
 {
-    const API_VERSION = '2.0';
-    const OLX_THREADS_URL = '/api/partner/threads';
-
-    private $user;
-    private $guzzleClient;
-    
-    public function __construct( User $user, Client $guzzleClient )
-    {
-        $this->user = $user;
-        $this->guzzleClient = $guzzleClient;
-    }
-    
     /**
-     * Get all messages for thread from OLX.ua
+     * Get all messages of a thread from OLX
      * @param int $thread_id
      * @param int $offset
      * @param int|null $limit
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function get( int $thread_id, int $offset = 0, int $limit = null ) : array
+    public function get(int $thread_id, int $offset = 0, ?int $limit = null): array
     {
+        $apiurl = Threads::OLX_THREADS_URL . '/' . $thread_id . '/messages';
 
-        try{
-            
-            $apiurl = '/api/partner/threads/'.$thread_id.'/messages';
-            
-            $params = [];
-
-            $params['offset'] = $offset;
-            $params['limit'] = $limit;
-            
-            $response = $this->guzzleClient->request( 'GET', $apiurl, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ] );
-
-            $messages = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $messages['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX thread messages' );
-
-            return $messages['data'];
-
-        }
-        catch ( \Exception $e ){
-            //print_r($e);
-            throw $e;
-        }
-
+        return $this->fetchData('GET', $apiurl, [
+            'query' => [ 'offset' => $offset, 'limit' => $limit ],
+        ], 'Get all OLX thread messages');
     }
-    
-    
-    
-    
+
+    /**
+     * Get a single message of a thread from OLX
+     * @param int $thread_id
+     * @param int $message_id
+     * @return array
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
+     */
+    public function getOne(int $thread_id, int $message_id): array
+    {
+        $apiurl = Threads::OLX_THREADS_URL . '/' . $thread_id . '/messages/' . $message_id;
+
+        return $this->fetchData('GET', $apiurl, [], 'Get OLX thread message: ' . $message_id);
+    }
 }

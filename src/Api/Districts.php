@@ -1,71 +1,63 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\BaseOlxException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ForbiddenException;
+use Parhomenko\Olx\Exceptions\NotAcceptableException;
+use Parhomenko\Olx\Exceptions\NotFoundException;
+use Parhomenko\Olx\Exceptions\ServerException;
+use Parhomenko\Olx\Exceptions\UnauthorizedException;
+use Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException;
+use Parhomenko\Olx\Exceptions\ValidationException;
 
-class Districts
+class Districts extends AbstractResource
 {
-    const API_VERSION = '2.0';
-    const OLX_DISTRICTS_URL = '/api/partner/districts';
-
-    private $user;
-    private $guzzleClient;
-
-    public function __construct( User $user, Client $guzzleClient )
-    {
-        $this->user = $user;
-        $this->guzzleClient = $guzzleClient;
-    }
+    public const OLX_DISTRICTS_URL = '/api/partner/districts';
 
     /**
+     * Get all OLX districts
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function getAll() : array
+    public function getAll(): array
     {
-        try {
-            $response = $this->guzzleClient->request('GET', self::OLX_DISTRICTS_URL, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ]);
-
-            $data = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $data['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX districts' );
-
-            return $data['data'];
-
-        } catch ( \Exception $e ){
-            throw $e;
-        }
+        return $this->fetchData('GET', self::OLX_DISTRICTS_URL, [], 'Get all OLX districts');
     }
 
     /**
+     * Get one OLX district by ID
      * @param int $district_id
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function get(int $district_id) : array
+    public function get(int $district_id): array
     {
-        try {
-            $response = $this->guzzleClient->request('GET', self::OLX_DISTRICTS_URL .'/' .$district_id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ]);
-
-            $data = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $data['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX district' );
-
-            return $data['data'];
-
-        } catch ( \Exception $e ){
-            throw $e;
-        }
+        return $this->fetchData('GET', self::OLX_DISTRICTS_URL . '/' . $district_id, [], 'Get OLX district: ' . $district_id);
     }
 }

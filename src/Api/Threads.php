@@ -1,238 +1,176 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Parhomenko\Olx\Exceptions\BadRequestException;
+use Parhomenko\Olx\Exceptions\BaseOlxException;
+use Parhomenko\Olx\Exceptions\CallLimitException;
+use Parhomenko\Olx\Exceptions\ForbiddenException;
+use Parhomenko\Olx\Exceptions\NotAcceptableException;
+use Parhomenko\Olx\Exceptions\NotFoundException;
+use Parhomenko\Olx\Exceptions\ServerException;
+use Parhomenko\Olx\Exceptions\UnauthorizedException;
+use Parhomenko\Olx\Exceptions\UnsupportedMediaTypeException;
+use Parhomenko\Olx\Exceptions\ValidationException;
 
-class Threads
+class Threads extends AbstractResource
 {
-    const API_VERSION = '2.0';
-    const OLX_THREADS_URL = '/api/partner/threads';
+    public const OLX_THREADS_URL = '/api/partner/threads';
 
-    private $user;
-    private $guzzleClient;
-    
-    public function __construct( User $user, Client $guzzleClient )
-    {
-        $this->user = $user;
-        $this->guzzleClient = $guzzleClient;
-    }
-    
     /**
-     * Get OLX.ua thread info 
+     * Get OLX thread info
      * @param int $thread_id
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function get( int $thread_id ) : array
+    public function get(int $thread_id): array
     {
-
-        try{
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_THREADS_URL.'/'.$thread_id, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ]
-            ] );
-
-            $thread = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $thread['data'] ) ) throw new \Exception( 'Got empty response | Get OLX thread' );
-
-            return $thread['data'];
-
-        }
-        catch ( \Exception $e ){
-            throw $e;
-        }
-
+        return $this->fetchData('GET', self::OLX_THREADS_URL . '/' . $thread_id, [], 'Get OLX thread: ' . $thread_id);
     }
-    
+
     /**
-     * Get all threads from OLX.ua
+     * Get all threads from OLX
      * @param int $offset
      * @param int|null $limit
      * @param int|null $advert_id
      * @param int|null $interlocutor_id
      * @return array
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function getAll( int $offset = 0, int $limit = null, int $advert_id = null, int $interlocutor_id = null ) : array
+    public function getAll(int $offset = 0, ?int $limit = null, ?int $advert_id = null, ?int $interlocutor_id = null): array
     {
+        $params = [
+            'offset' => $offset,
+            'limit' => $limit,
+        ];
 
-        try{
-
-            $params = [];
-
-            $params['offset'] = $offset;
-            $params['limit'] = $limit;
-            if( $advert_id ) $params['advert_id'] = $advert_id;
-            if( $interlocutor_id ) $params['interlocutor_id'] = $interlocutor_id;
-
-            $response = $this->guzzleClient->request( 'GET', self::OLX_THREADS_URL, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'query' => $params
-            ] );
-
-            $threads = json_decode( $response->getBody()->getContents(), true );
-
-            if( !isset( $threads['data'] ) ) throw new \Exception( 'Got empty response | Get all OLX threads' );
-
-            return $threads['data'];
-
+        if ($advert_id) {
+            $params['advert_id'] = $advert_id;
         }
-        catch ( \Exception $e ){
-            throw $e;
+        if ($interlocutor_id) {
+            $params['interlocutor_id'] = $interlocutor_id;
         }
 
+        return $this->fetchData('GET', self::OLX_THREADS_URL, [ 'query' => $params ], 'Get all OLX threads');
     }
-    
+
     /**
-     * Mark thread as readed
+     * Mark a thread as read
      * @param int $thread_id
-     * @return bool
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function mark_as_read( int $thread_id ) : bool
+    public function markAsRead(int $thread_id): void
     {
-        try{
+        $response = $this->request('POST', self::OLX_THREADS_URL . '/' . $thread_id . '/commands', [
+            'json' => [ 'command' => 'mark-as-read' ],
+        ]);
 
-            $params = ['command' => 'mark-as-read'];
-            
-            $apiurl = self::OLX_THREADS_URL.'/'.$thread_id.'/commands';
-
-            $response = $this->guzzleClient->request( 'POST', $apiurl, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-            
-            //var_dump($response->getBody()->getContents());
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new \Exception( $response->getBody()->getContents() );
-
-        }
-        catch ( \Exception $e ){
-            throw $e;
-        }
+        $this->expectStatus($response);
     }
-    
+
     /**
-     * Mark thread as favourite
+     * Mark a thread as favourite
      * @param int $thread_id
-     * @return bool
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function set_favourite( int $thread_id ) : bool
+    public function setFavourite(int $thread_id): void
     {
-        try{
+        $response = $this->request('POST', self::OLX_THREADS_URL . '/' . $thread_id . '/commands', [
+            'json' => [ 'command' => 'set-favourite', 'set-favourite' => true ],
+        ]);
 
-            $params = ['command' => 'set-favourite', 'set-favourite' => true];
-            
-            $apiurl = self::OLX_THREADS_URL.'/'.$thread_id.'/commands';
-
-            $response = $this->guzzleClient->request( 'POST', $apiurl, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new \Exception( $response->getBody()->getContents() );
-
-        }
-        catch ( \Exception $e ){
-            throw $e;
-        }
+        $this->expectStatus($response);
     }
-    
+
     /**
-     * Unset favourite mark from thread
+     * Remove the favourite mark from a thread
      * @param int $thread_id
-     * @return bool
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function unset_favourite( int $thread_id ) : bool
+    public function unsetFavourite(int $thread_id): void
     {
-        try{
+        $response = $this->request('POST', self::OLX_THREADS_URL . '/' . $thread_id . '/commands', [
+            'json' => [ 'command' => 'set-favourite', 'set-favourite' => false ],
+        ]);
 
-            $params = ['command' => 'set-favourite', 'set-favourite' => false];
-            
-            $apiurl = self::OLX_THREADS_URL.'/'.$thread_id.'/commands';
-
-            $response = $this->guzzleClient->request( 'POST', $apiurl, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-
-            if( $response->getStatusCode() === 204 )
-            {
-                return true;
-            }
-
-            throw new \Exception( $response->getBody()->getContents() );
-
-        }
-        catch ( \Exception $e ){
-            throw $e;
-        }
+        $this->expectStatus($response);
     }
-    
+
     /**
-     * Post message to the thread
+     * Post a message to a thread
      * @param int $thread_id
      * @param string $text
-     * @return bool
-     * @throws \Exception
+     * @throws GuzzleException on a transport/connection error
+     * @throws BadRequestException on HTTP 400, or an empty/invalid response
+     * @throws ValidationException on HTTP 400 with field validation errors
+     * @throws UnauthorizedException on HTTP 401
+     * @throws ForbiddenException on HTTP 403
+     * @throws NotFoundException on HTTP 404
+     * @throws NotAcceptableException on HTTP 406
+     * @throws UnsupportedMediaTypeException on HTTP 415
+     * @throws CallLimitException on HTTP 429
+     * @throws ServerException on HTTP 5xx
+     * @throws BaseOlxException any other OLX API error
      */
-    public function post( int $thread_id, string $text ) : bool
+    public function post(int $thread_id, string $text): void
     {
+        $response = $this->request('POST', self::OLX_THREADS_URL . '/' . $thread_id . '/messages', [
+            'json' => [ 'text' => $text ],
+        ]);
 
-        try{
-            
-            $params = ['text' => $text];
-            
-            $apiurl = self::OLX_THREADS_URL.'/'.$thread_id.'/messages';
-
-            $response = $this->guzzleClient->request( 'POST', $apiurl, [
-                'headers' => [
-                    'Authorization' => $this->user->getTokenType() .' ' .$this->user->getAccessToken(),
-                    'Version' => self::API_VERSION
-                ],
-                'json' => $params
-            ] );
-            //var_dump($response->getStatusCode());
-            if( $response->getStatusCode() === 200 )
-            {
-                return true;
-            }
-
-            throw new \Exception( $response->getBody()->getContents() );
-
-        }
-        catch ( \Exception $e ){
-            throw $e;
-        }
-
+        $this->expectStatus($response, 200);
     }
 }
