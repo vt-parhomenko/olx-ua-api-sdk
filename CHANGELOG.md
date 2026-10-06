@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0]
+
+### Added
+
+- Optional `array $httpOptions` argument on `Api::__construct()` and `OlxFactory::get()`: Guzzle client
+  options (`timeout`, `connect_timeout`, `handler`, `proxy`, …) applied to every request, including the OAuth
+  token requests. A `base_uri` key in the options is ignored — the country/base URI argument always wins.
+- `Api::getHttpClient()` returns the underlying HTTP client (e.g. to inspect its configuration).
+
+### Changed
+
+- `AbstractResource` and `Authenticator` accept any `GuzzleHttp\ClientInterface` instead of the concrete
+  `GuzzleHttp\Client` (type widening; existing callers are unaffected).
+
+Without `$httpOptions` the client is configured exactly as in 3.0.0 (no timeouts — Guzzle waits indefinitely),
+so the release is backward compatible.
+
 ## [3.0.0]
 
 3.0 is a breaking release relative to 2.x. See the "Upgrading from 2.x to 3.0"

@@ -8,7 +8,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Query;
@@ -40,7 +40,7 @@ class Authenticator
      */
     public const TOKEN_EXPIRY_BUFFER = 60;
 
-    private Client $guzzleClient;
+    private ClientInterface $guzzleClient;
     private string $base_uri;
     private string $client_id;
     private string $client_secret;
@@ -52,7 +52,7 @@ class Authenticator
     private string $grant_type;
     private string $scope;
 
-    public function __construct(Client $guzzleClient, Credentials $credentials, string $base_uri)
+    public function __construct(ClientInterface $guzzleClient, Credentials $credentials, string $base_uri)
     {
         $this->guzzleClient = $guzzleClient;
         $this->base_uri = $base_uri;

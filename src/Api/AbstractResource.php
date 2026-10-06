@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Parhomenko\Olx\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use Parhomenko\Olx\Exceptions\BaseOlxException;
@@ -31,7 +31,7 @@ abstract class AbstractResource
 {
     public const API_VERSION = '2.0';
 
-    public function __construct(protected Authenticator $authenticator, protected Client $guzzleClient)
+    public function __construct(protected Authenticator $authenticator, protected ClientInterface $guzzleClient)
     {
     }
 

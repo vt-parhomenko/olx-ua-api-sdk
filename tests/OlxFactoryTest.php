@@ -32,6 +32,30 @@ class OlxFactoryTest extends TestCase
         $this->assertInstanceOf(Api::class, $api);
     }
 
+    public function testPassesHttpOptionsToTheClient(): void
+    {
+        $api = OlxFactory::get(Country::PL, [
+            'client_id' => 'id',
+            'client_secret' => 'secret',
+        ], false, [ 'timeout' => 7, 'connect_timeout' => 3 ]);
+
+        $client = $api->getHttpClient();
+
+        $this->assertSame(7, $client->getConfig('timeout'));
+        $this->assertSame(3, $client->getConfig('connect_timeout'));
+        $this->assertSame(Country::PL->baseUri(), (string) $client->getConfig('base_uri'));
+    }
+
+    public function testHttpOptionsDefaultToNone(): void
+    {
+        $api = OlxFactory::get('ua', [
+            'client_id' => 'id',
+            'client_secret' => 'secret',
+        ]);
+
+        $this->assertNull($api->getHttpClient()->getConfig('timeout'));
+    }
+
     public function testThrowsForUnknownCountry(): void
     {
         $this->expectException(UnknownCountryException::class);

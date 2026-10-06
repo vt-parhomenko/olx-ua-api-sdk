@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Parhomenko\Olx\Tests;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -40,7 +41,7 @@ abstract class OlxTestCase extends BaseTestCase
         ]);
     }
 
-    protected function authenticator(Client $client): Authenticator
+    protected function authenticator(ClientInterface $client): Authenticator
     {
         return new Authenticator($client, new Credentials(
             clientId: 'test-id',

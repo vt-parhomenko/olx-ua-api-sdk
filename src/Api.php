@@ -6,6 +6,7 @@ namespace Parhomenko\Olx;
 
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Parhomenko\Olx\Api\Adverts;
 use Parhomenko\Olx\Api\Authenticator;
@@ -26,7 +27,7 @@ use Parhomenko\Olx\Api\UsersBusiness;
 class Api implements OlxApiInterface
 {
     private Authenticator $authenticator;
-    private Client $guzzleClient;
+    private ClientInterface $guzzleClient;
 
     private Categories|null $categories = null;
     private Adverts|null $adverts = null;
@@ -47,13 +48,20 @@ class Api implements OlxApiInterface
      * @param string $base_uri
      * @param Credentials|array<string, mixed> $credentials credential set; client_id and client_secret are required
      * @param bool $update_token refresh the access token on construction if it has expired
+     * @param array<string, mixed> $httpOptions Guzzle client options (e.g. timeout, connect_timeout, handler,
+     *        proxy); applied to every request, including the OAuth token requests. A base_uri key is ignored:
+     *        the $base_uri argument always wins.
      * @throws Exception|GuzzleException if required credentials are missing or the token refresh fails
      */
-    public function __construct(string $base_uri, Credentials|array $credentials, bool $update_token = false)
-    {
+    public function __construct(
+        string $base_uri,
+        Credentials|array $credentials,
+        bool $update_token = false,
+        array $httpOptions = [],
+    ) {
         $credentials = $credentials instanceof Credentials ? $credentials : Credentials::fromArray($credentials);
 
-        $this->guzzleClient = new Client(['base_uri' => $base_uri]);
+        $this->guzzleClient = new Client(['base_uri' => $base_uri] + $httpOptions);
         $this->authenticator = new Authenticator($this->guzzleClient, $credentials, $base_uri);
 
         if ($update_token) {
@@ -64,6 +72,14 @@ class Api implements OlxApiInterface
     public function authenticator(): Authenticator
     {
         return $this->authenticator;
+    }
+
+    /**
+     * The underlying HTTP client shared by the authenticator and every resource.
+     */
+    public function getHttpClient(): ClientInterface
+    {
+        return $this->guzzleClient;
     }
 
     public function categories(): Categories

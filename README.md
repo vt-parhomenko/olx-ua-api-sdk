@@ -49,6 +49,38 @@ The third argument, `$update_token`, when `true`, checks the token on
 construction and transparently refreshes it via the refresh token if it is
 expired.
 
+## HTTP client options
+
+The optional fourth argument, `$httpOptions` (since 3.1), is passed to the
+underlying [Guzzle client](https://docs.guzzlephp.org/en/stable/request-options.html)
+and applies to every request — resource calls as well as the OAuth token
+requests. By default no options are set, and Guzzle then waits **indefinitely**
+for a response, so setting at least `timeout` and `connect_timeout` is strongly
+recommended for queue workers and other long-running processes.
+
+```php
+use GuzzleHttp\HandlerStack;
+use Parhomenko\Olx\Country;
+use Parhomenko\Olx\OlxFactory;
+
+$stack = HandlerStack::create();
+$stack->push($myLoggingOrRetryMiddleware); // any Guzzle middleware
+
+$olx = OlxFactory::get(Country::UA, $credentials, false, [
+    'timeout'         => 30,   // total seconds per request
+    'connect_timeout' => 5,    // seconds to establish the connection
+    'handler'         => $stack,
+]);
+
+$olx->getHttpClient(); // the configured GuzzleHttp\ClientInterface
+```
+
+The same array can be passed to `new Api($baseUri, $credentials, $update_token, $httpOptions)`.
+A `base_uri` key in the options is ignored: the base URI of the selected
+country (or the `$baseUri` argument of `Api`) always wins. A timeout surfaces
+as `GuzzleHttp\Exception\ConnectException` (a `GuzzleException`), not as an
+OLX exception.
+
 ## Authentication (OAuth2)
 
 Only `client_id` and `client_secret` are strictly required. The full credential
